@@ -1,79 +1,68 @@
-// access input field
-const input = document.querySelector('#todo-input');
+const inputBox = document.getElementById("input-box");
+const listContainer = document.getElementById("list-container");
 
-// Listening to click event from "Add" button.
-document.querySelector('#submit').addEventListener('click', () => {
-  // value of the input field
-  const inputData = input.value;
-  input.value = "";
+function addTask() {
+  const task = inputBox.value.trim();
+  if (!task) {
+    alert("Please write down a task");
+    return;
+  }
 
-  // creating todo item element
-  const todo_el = document.createElement('div');
-  todo_el.classList.add('todo-item');
+  // Create an `li` element for the new task
+  const li = document.createElement("li");
+  li.innerHTML = `
+    <label>
+      <input type="checkbox">
+      <span>${task}</span>
+    </label>
+    <span class="edit-btn">Edit</span>
+    <span class="delete-btn">Delete</span>
+  `;
 
-  const todo_content_el = document.createElement('div');
-  todo_el.appendChild(todo_content_el);
+  listContainer.appendChild(li);
+  inputBox.value = "";
 
-  const todo_input_el = document.createElement('input');
-  todo_input_el.classList.add('text');
-  todo_input_el.type = 'text';
-  todo_input_el.value = inputData;
-  todo_input_el.setAttribute('readonly', 'readonly');
+  // Attach event listeners for the newly created elements
+  const checkbox = li.querySelector("input");
+  const editBtn = li.querySelector(".edit-btn");
+  const taskSpan = li.querySelector("span");
+  const deleteBtn = li.querySelector(".delete-btn");
 
-  todo_content_el.appendChild(todo_input_el);
+  // Toggle 'completed' class when checkbox is clicked
+  checkbox.addEventListener("click", function () {
+    li.classList.toggle("completed", checkbox.checked);
+    updateCounters();
+  });
 
-  const todo_actions_el = document.createElement('div');
-  todo_actions_el.classList.add('action-items');
-
-  const todo_done_el = document.createElement('i');
-  todo_done_el.classList.add('fa-solid');
-  todo_done_el.classList.add('fa-check');
-
-  const todo_edit_el = document.createElement('i');
-  todo_edit_el.classList.add('fa-solid');
-  todo_edit_el.classList.add('fa-pen-to-square');
-  todo_edit_el.classList.add('edit');
-
-  const todo_delete_el = document.createElement('i');
-  todo_delete_el.classList.add('fa-solid');
-  todo_delete_el.classList.add('fa-trash');
-
-  todo_actions_el.appendChild(todo_done_el)
-  todo_actions_el.appendChild(todo_edit_el);
-  todo_actions_el.appendChild(todo_delete_el);
-
-  todo_el.appendChild(todo_actions_el);
-  console.log(todo_el)
-  // add the todo-item to lists
-  document.querySelector('.todo-lists').appendChild(todo_el);
-
-  // done functionality
-  todo_done_el.addEventListener('click', () => {
-    todo_input_el.classList.add('done')
-    todo_el.removeChild(todo_actions_el);
-  })
-
-  // edit functionality
-  todo_edit_el.addEventListener('click', (e) => {
-    if (todo_edit_el.classList.contains("edit")) {
-      todo_edit_el.classList.remove("edit");
-      todo_edit_el.classList.remove("fa-pen-to-square");
-      todo_edit_el.classList.add("fa-x");
-      todo_edit_el.classList.add("save");
-      todo_input_el.removeAttribute("readonly");
-      todo_input_el.focus();
-    } else {
-      todo_edit_el.classList.remove("save");
-      todo_edit_el.classList.remove("fa-x");
-      todo_edit_el.classList.add("fa-pen-to-square");
-      todo_edit_el.classList.add("edit");
-      todo_input_el.setAttribute("readonly", "readonly");
+  // Allow task editing
+  editBtn.addEventListener("click", function () {
+    const updatedTask = prompt("Edit task:", taskSpan.textContent);
+    if (updatedTask !== null) {
+      taskSpan.textContent = updatedTask;
+      li.classList.remove("completed");
+      checkbox.checked = false;
+      updateCounters();
     }
   });
 
-  // delete functionality
-  todo_delete_el.addEventListener('click', (e) => {
-    console.log(todo_el);
-    document.querySelector('.todo-lists').removeChild(todo_el);
+  // Delete the task
+  deleteBtn.addEventListener("click", function () {
+    if (confirm("Are you sure you want to delete this task?")) {
+      li.remove();
+      updateCounters();
+    }
   });
-})
+
+  updateCounters();
+}
+
+// Counters for completed and uncompleted tasks
+const completedCounter = document.getElementById("completed-counter");
+const uncompletedCounter = document.getElementById("uncompleted-counter");
+
+function updateCounters() {
+  const completedTasks = document.querySelectorAll(".completed").length;
+  const uncompletedTasks = document.querySelectorAll("li:not(.completed)").length;
+  completedCounter.textContent = completedTasks;
+  uncompletedCounter.textContent = uncompletedTasks;
+}
